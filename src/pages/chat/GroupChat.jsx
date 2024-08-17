@@ -5,7 +5,6 @@ import GroupChatModal from "./GroupChatModal";
 import { useState } from "react";
 
 function GroupChat() {
-  const [selectedGroup, setSelectedGroup] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const queryClient = useQueryClient();
 
@@ -25,7 +24,7 @@ function GroupChat() {
           <h1 className="text-2xl font-bold mb-4">Group Chats</h1>
           <button
             className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
-            // onClick={openModal}
+            onClick={() => setIsModalOpen(!isModalOpen)}
           >
             Create Group
           </button>
@@ -47,23 +46,10 @@ function GroupChat() {
     );
   }
 
-  const openModal = () => {
-    setIsModalOpen(true);
-  };
-
-  // Function to close the modal
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
-
   // Function to handle the creation of a new group chat
-  const handleCreateGroup = (newGroupChat) => {
-    // Update the query cache with the new group chat
-    queryClient.setQueryData(["chats"], (oldData) => [
-      ...oldData,
-      newGroupChat,
-    ]);
-    closeModal(); // Close the modal after creation
+  const handleCreateGroup = async () => {
+    await queryClient.invalidateQueries(["groupchats"]);
+    setIsModalOpen(false);
   };
 
   return (
@@ -73,7 +59,7 @@ function GroupChat() {
           <h1 className="text-2xl font-bold mb-4">Group Chats</h1>
           <button
             className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
-            onClick={openModal}
+            onClick={() => setIsModalOpen(!isModalOpen)}
           >
             Create Group
           </button>
@@ -81,8 +67,8 @@ function GroupChat() {
 
         {isModalOpen && (
           <GroupChatModal
-            onClose={closeModal}
             onCreateGroup={handleCreateGroup}
+            onClose={() => setIsModalOpen(false)} // Pass the onClose prop
           />
         )}
 
@@ -118,10 +104,8 @@ function GroupChat() {
               );
             })
           ) : (
-            <div className="flex items-center justify-center flex-1">
-              <p className="text-gray-500">
-                Search for a user to start a chat.
-              </p>
+            <div className="flex items-center justify-center h-full text-gray-400">
+              No group chats available.
             </div>
           )}
         </div>

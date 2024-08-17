@@ -4,12 +4,11 @@ import AsyncSelect from "react-select/async";
 import { createGroupChat } from "../../api/chatAPI"; // Import the API function
 import { fetchUsers } from "../../api/userAPI";
 
-function GroupChatModal({ onClose, onCreateGroup }) {
+function GroupChatModal({ onCreateGroup, onClose }) {
   const [groupName, setGroupName] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [isCreating, setIsCreating] = useState(false);
 
-  // Load user options asynchronously for the select input
   const loadOptions = async (inputValue, callback) => {
     if (!inputValue) {
       callback([]);
@@ -17,7 +16,7 @@ function GroupChatModal({ onClose, onCreateGroup }) {
     }
 
     try {
-      const fetchedUsers = await fetchUsers(inputValue); // Assuming fetchUsers API fetches the list of users
+      const fetchedUsers = await fetchUsers(inputValue);
       const options = fetchedUsers.map((user) => ({
         label: user.name,
         value: user._id,
@@ -30,7 +29,6 @@ function GroupChatModal({ onClose, onCreateGroup }) {
     }
   };
 
-  // Handle the group creation
   const handleCreateGroup = async () => {
     if (!groupName || selectedUsers.length < 2) {
       alert("Please enter a group name and select at least two users.");
@@ -39,12 +37,10 @@ function GroupChatModal({ onClose, onCreateGroup }) {
 
     setIsCreating(true);
     try {
-      // Convert selected user IDs to JSON string format
       const selectedUserIds = selectedUsers.map((user) => user.value);
-
       const newGroupChat = await createGroupChat(groupName, selectedUserIds);
       onCreateGroup(newGroupChat); // Callback to notify parent component
-      onClose(); // Close the modal
+      onClose(); // Close the modal on success
     } catch (error) {
       console.error("Failed to create group chat:", error.message);
     } finally {

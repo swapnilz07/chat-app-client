@@ -1,11 +1,26 @@
 import { Form, Formik, Field, ErrorMessage } from "formik";
 import { validationSchemaForLogin } from "../../../config/formConfig.js";
 import TextError from "../../../components/common/TextError";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { LoginUser } from "../../../api/authAPI.js";
+import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
 function LoginPage() {
-  const handleSubmit = (values) => {
-    console.log("Form data", values);
-  };
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: loginMutaion,
+    isError,
+    isPending,
+    error,
+  } = useMutation({
+    mutationFn: LoginUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["authuser"] });
+      toast.success("User logged in successfully.");
+    },
+  });
 
   return (
     <div className="h-screen w-full flex  justify-center items-center px-3">
@@ -16,7 +31,13 @@ function LoginPage() {
         <Formik
           initialValues={{ email: "", password: "" }}
           validationSchema={validationSchemaForLogin}
-          onSubmit={handleSubmit}
+          onSubmit={(values, actions) => {
+            loginMutaion(values);
+            actions.resetForm({
+              email: "",
+              password: "",
+            });
+          }}
         >
           {({ touched, errors }) => (
             <Form className="space-y-6 w-full max-w-md">
@@ -74,12 +95,21 @@ function LoginPage() {
                   type="submit"
                   className="w-full py-2 px-4 bg-[#4A5C6A] text-white rounded-md hover:bg-blue-700"
                 >
-                  Login
+                  {isPending ? "Loading..." : "Login"}
                 </button>
               </div>
+              {isError && (
+                <p className="text-red-600 text-sm mt-2">{error?.message}</p>
+              )}
             </Form>
           )}
         </Formik>
+        <div className="flex justify-evenly gap-2 mt-4">
+          <p className="text-white text-lg">{"Don't"} have an account?</p>
+          <Link to="/signup">
+            <button className="btn-link">Sign up</button>
+          </Link>
+        </div>
       </div>
     </div>
   );

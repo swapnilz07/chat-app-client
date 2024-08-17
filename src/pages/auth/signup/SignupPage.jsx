@@ -1,20 +1,18 @@
-/* eslint-disable react/prop-types */
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { validationSchemaForSignup } from "../../../config/formConfig.js";
 import { signupUser } from "../../../api/authAPI.js";
 import TextError from "../../../components/common/TextError.jsx";
+import { Link } from "react-router-dom";
 
 function SignupPage() {
   const { mutate, isError, isPending, error } = useMutation({
     mutationFn: signupUser,
-    onSuccess: (data) => {
-      console.log("User registered successfully:", data);
+    onSuccess: () => {
       toast.success("User registered successfully.");
     },
     onError: (error) => {
-      console.error("Signup failed:", error.message);
       toast.error(error?.message || "Something went wrong.");
     },
   });
@@ -33,7 +31,6 @@ function SignupPage() {
           }}
           validationSchema={validationSchemaForSignup}
           onSubmit={(values, actions) => {
-            console.log("values", values);
             mutate(values);
             actions.resetForm({
               name: "",
@@ -132,6 +129,12 @@ function SignupPage() {
             </Form>
           )}
         </Formik>
+        <div className="flex justify-evenly gap-2 mt-4">
+          <p className="text-white text-lg">Already have an account?</p>
+          <Link to="/login">
+            <button className="btn-link">Sign in</button>
+          </Link>
+        </div>
       </div>
     </div>
   );

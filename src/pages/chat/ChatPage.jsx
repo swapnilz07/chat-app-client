@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { accessChat, fetchChats } from "../../api/chatAPI";
@@ -6,7 +5,7 @@ import { fetchUsers } from "../../api/userAPI";
 import AsyncSelect from "react-select/async";
 import FetchChatSkeleton from "../../components/skeleton/FetchChatSkeleton";
 
-function MessageList() {
+function ChatPage() {
   const [, setSelectedUser] = useState(null);
   const queryClient = useQueryClient();
 
@@ -19,7 +18,6 @@ function MessageList() {
   } = useQuery({
     queryKey: ["chats"],
     queryFn: fetchChats,
-    staleTime: Infinity,
   });
 
   const {
@@ -200,4 +198,4 @@ function MessageList() {
   );
 }
 
-export default MessageList;
+export default ChatPage;

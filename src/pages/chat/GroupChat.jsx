@@ -4,6 +4,7 @@ import { fetchChats } from "../../api/chatAPI";
 import GroupChatModal from "./GroupChatModal";
 import { useState } from "react";
 
+
 function GroupChat() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const queryClient = useQueryClient();

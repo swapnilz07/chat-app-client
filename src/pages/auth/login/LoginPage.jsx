@@ -17,8 +17,9 @@ function LoginPage() {
   } = useMutation({
     mutationFn: LoginUser,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["authuser"] });
       toast.success("User logged in successfully.");
+      queryClient.invalidateQueries({ queryKey: ["authuser"] });
+      window.location.href = "/";
     },
   });
 

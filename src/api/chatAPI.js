@@ -1,9 +1,9 @@
 export const fetchChats = async () => {
   try {
     const res = await fetch("/api/chat/fetchchats");
+    const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Something went wrong.");
 
-    const data = await res.json();
     return data;
   } catch (error) {
     console.log(error.message);
@@ -21,9 +21,9 @@ export const accessChat = async (userId) => {
       body: JSON.stringify({ userId }),
     });
 
+    const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Something went wrong.");
 
-    const data = await res.json();
     return data;
   } catch (error) {
     console.log(error.message);
@@ -44,9 +44,9 @@ export const createGroupChat = async (groupName, selectedUsers) => {
       }),
     });
 
+    const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Something went wrong.");
 
-    const data = await res.json();
     return data;
   } catch (error) {
     console.log(error.message);

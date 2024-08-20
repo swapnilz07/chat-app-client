@@ -1,6 +1,6 @@
 import { Toaster } from "react-hot-toast";
 import { Routes, Route, Navigate } from "react-router-dom";
-// import HomePage from "./pages/home/HomePage";
+import HomePage from "./pages/home/HomePage";
 import LoginPage from "./pages/auth/login/LoginPage";
 import SignupPage from "./pages/auth/signup/SignupPage";
 import ProfilePage from "./pages/profile/ProfilePage";
@@ -8,8 +8,8 @@ import { useQuery } from "@tanstack/react-query";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 import Sidebar from "./components/common/Sidebar";
 import { getMe } from "./api/authAPI";
-import ChatPage from "./pages/chat/ChatPage";
 import GroupChat from "./pages/chat/GroupChat";
+import MessagePage from "./pages/messages/MessagesPage";
 
 function App() {
   const { data: authUser, isLoading } = useQuery({
@@ -26,14 +26,16 @@ function App() {
     );
   }
 
+  console.log("authUser==", authUser);
+
   return (
     <>
-      <div className="flex mx-8">
+      <div className="flex mx-8 ">
         {authUser && <Sidebar />}
         <Routes>
           <Route
             path="/"
-            element={<Navigate to={authUser ? "/chats" : "/login"} />}
+            element={authUser ? <HomePage /> : <Navigate to="/login" />}
           />
           <Route
             path="/login"
@@ -47,14 +49,14 @@ function App() {
             path="/profile/:name"
             element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
           />
-          <Route
-            path="/chats"
-            element={authUser ? <ChatPage /> : <Navigate to="/login" />}
-          />
-          {/* <Route path="/chat/:name" element={<ChatWithUser />} /> */}
+          <Route path="/messages/:chatId" element={<MessagePage />} />{" "}
           <Route
             path="/group-chat"
             element={authUser ? <GroupChat /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/group-chat/messages/:chatId"
+            element={<MessagePage />}
           />
         </Routes>
         <Toaster position="top-right" />

@@ -12,7 +12,7 @@ export const signupUser = async ({ name, email, password }) => {
     return data;
   } catch (error) {
     console.log(error.message);
-    throw error;
+    throw new Error(error.message);
   }
 };
 
@@ -20,17 +20,18 @@ export const LoginUser = async ({ email, password }) => {
   try {
     const res = await fetch("/api/auth/login", {
       method: "POST",
-      headers: { "Content-type": "application/json" },
+      headers: { "content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
 
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Failed to create account.");
+    if (!res.ok) throw new Error(data.error || "Failed to Login.");
 
+    console.log(data);
     return data;
   } catch (error) {
-    console.log(error.message);
-    throw error;
+    console.log(error);
+    throw new Error(error.message);
   }
 };
 
@@ -45,6 +46,6 @@ export const getMe = async () => {
     return data;
   } catch (error) {
     console.log(error.message);
-    throw error;
+    throw new Error(error.message);
   }
 };

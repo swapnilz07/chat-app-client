@@ -1,11 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { accessChat, fetchChats } from "../../api/chatAPI";
 import { fetchUsers } from "../../api/userAPI";
 import AsyncSelect from "react-select/async";
 import FetchChatSkeleton from "../../components/skeleton/FetchChatSkeleton";
 import { useNavigate } from "react-router-dom";
-import socket from "../../config/socketConfig";
 
 const HomePage = () => {
   const [, setSelectedUser] = useState(null);
@@ -59,24 +58,6 @@ const HomePage = () => {
       console.error("Error fetching users:", error);
     }
   };
-
-  useEffect(() => {
-    // Join the user's chat room
-    if (authUser) {
-      socket.emit("registerUser", authUser._id);
-    }
-
-    // Listen for incoming messages
-    socket.on("messageReceived", (message) => {
-      // Fetch chats again to refresh the latest messages
-      queryClient.invalidateQueries(["chats"]);
-    });
-
-    // Clean up the socket connection when the component unmounts
-    return () => {
-      socket.off("messageReceived"); // Remove the listener
-    };
-  }, [authUser, queryClient]);
 
   const selectStyles = {
     control: (provided) => ({
@@ -136,7 +117,7 @@ const HomePage = () => {
   if (fetchingChatError) {
     return (
       <div className="p-4 w-96 h-screen flex items-center justify-center text-red-500">
-        Error fetching chats: {fetchError.message}
+        {fetchError.message} || Something went wrong.
       </div>
     );
   }
@@ -173,7 +154,7 @@ const HomePage = () => {
         </div>
         <div className="flex-1 overflow-y-auto mt-4 max-w-full">
           {filteredChats?.length > 0 ? (
-            filteredChats.map((chat, index) => {
+            filteredChats?.map((chat, index) => {
               const otherUser = chat.users.find(
                 (user) => user._id !== authUser._id
               );

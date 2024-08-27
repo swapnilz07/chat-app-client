@@ -26,8 +26,6 @@ function App() {
     );
   }
 
-  console.log("authUser==", authUser);
-
   return (
     <>
       <div className="flex mx-8 ">

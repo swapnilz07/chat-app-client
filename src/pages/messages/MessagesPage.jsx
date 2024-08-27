@@ -3,34 +3,31 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { fetchMessages, sendMessageAPI } from "../../api/messageAPI";
 import socket from "../../config/socketConfig";
-import { format } from "date-fns";
+import MessageHeader from "./MessageHeader";
+import MessageInput from "./MessageInput";
+import MessageList from "./MessageList";
 
 function MessagePage() {
-  const { chatId } = useParams(); // Get the chatId from the URL
-  const [messageContent, setMessageContent] = useState(""); // State to hold message content
-  const queryClient = useQueryClient(); // React Query's query client
+  const { chatId } = useParams();
+  const [messageContent, setMessageContent] = useState("");
+  const queryClient = useQueryClient();
 
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
-  console.log("authUser ==>>", authUser);
 
-  // Fetch existing messages for the chat
   const {
-    data: messages,
+    data: fetchedMessages,
     isError,
     isLoading,
-    error,
   } = useQuery({
     queryKey: ["messages", chatId],
     queryFn: () => fetchMessages(chatId),
   });
 
-  // Define the mutation for sending a message
   const sendMessageMutation = useMutation({
     mutationFn: (newMessage) => sendMessageAPI(newMessage),
     onSuccess: () => {
-      // Update the messages list with the new message
       queryClient.invalidateQueries(["messages", chatId]);
-      setMessageContent(""); // Clear the input box
+      setMessageContent("");
     },
     onError: (error) => {
       console.error("Error sending message:", error.message);
@@ -38,95 +35,68 @@ function MessagePage() {
   });
 
   useEffect(() => {
-    // Join the chat room for this chatId
-    socket.emit("joinRoom", chatId);
+    if (authUser?._id) {
+      socket.emit("registerUser", authUser._id);
+      socket.emit("joinRoom", chatId);
+    }
 
-    // Listen for incoming messages
     socket.on("messageReceived", (newMessage) => {
-      console.log("Message received on client:", newMessage);
       if (newMessage.chatId === chatId) {
-        // If the message is for the current chat, invalidate the messages query
         queryClient.invalidateQueries(["messages", chatId]);
       }
     });
 
-    // Clean up the socket listener when the component unmounts
     return () => {
-      socket.off("messageReceived"); // Remove the listener
+      socket.off("messageReceived");
     };
-  }, [chatId, queryClient]);
+  }, [authUser?._id, chatId, queryClient]);
 
-  // Handle form submission to send a message
   const handleSendMessage = (e) => {
     e.preventDefault();
 
     if (!messageContent.trim()) {
-      return; // Prevent sending empty messages
+      return;
     }
 
-    // Create the message object to send
     const newMessage = {
       content: messageContent,
       chatId: chatId,
-      senderId: authUser?._id,
+      sender: authUser?._id,
     };
 
-    // Emit the message to the server
-    socket.emit("sendMessage", newMessage); // Emit here first
-
-    // Call the mutation to send the message
+    socket.emit("sendMessage", newMessage);
     sendMessageMutation.mutate(newMessage);
   };
 
-  console.log("messages==>>", messages);
+  const chatUser = fetchedMessages?.[0]?.chat?.users?.find(
+    (user) => user._id !== authUser?._id
+  );
 
   return (
-    <div className="flex-1 h-screen overflow-auto p-4 bg-gray-900 text-white">
-      <h1 className="text-lg font-bold">Messages for Chat ID: {chatId}</h1>
+    <div className="flex flex-col h-screen bg-gray-900 text-white w-full">
+      <MessageHeader chatUser={chatUser} />
 
-      {/* Render loading state, error state, or messages */}
-      {isLoading && <p>Loading messages...</p>}
-      {isError && <p>Error loading messages: {error.message}</p>}
-      {!isLoading && !isError && (
-        <div className="mt-4">
-          {messages?.map((message) => (
-            <div
-              key={message._id}
-              className={`chat ${
-                message.sender._id === authUser?._id ? "chat-end" : "chat-start"
-              }`}
-            >
-              <div className="chat-header">
-                <span className="font-bold">{message.sender.name}</span>
-                <time className="text-xs opacity-50 pl-1">
-                  {format(new Date(message.createdAt), "HH:mm")}
-                </time>
-              </div>
-              <div className="chat-bubble break-words max-w-[55%] ">
-                {message.content}
-              </div>
-              {/* <div className="chat-footer opacity-50">Seen at {format(new Date(), "HH:mm")}</div> */}
-            </div>
-          ))}
+      {isLoading ? (
+        <div className="flex items-center justify-center h-screen bg-gray-900 w-full">
+          <span className="loading loading-dots loading-lg"></span>
+        </div>
+      ) : (
+        <MessageList messages={fetchedMessages} authUser={authUser} />
+      )}
+
+      {isError && (
+        <div className="flex items-center justify-center h-screen bg-gray-900 w-full">
+          <p className="text-red-500">
+            Something Went Wrong, Please try again later...
+          </p>
         </div>
       )}
 
-      {/* Input box for typing a new message */}
-      <form onSubmit={handleSendMessage} className="mt-4 flex">
-        <input
-          type="text"
-          value={messageContent}
-          onChange={(e) => setMessageContent(e.target.value)}
-          placeholder="Type a message..."
-          className="flex-1 p-2 border rounded-l bg-gray-800 text-white"
-        />
-        <button
-          type="submit"
-          className="bg-blue-500 p-2 rounded-r text-white hover:bg-blue-600"
-        >
-          Send
-        </button>
-      </form>
+      <MessageInput
+        messageContent={messageContent}
+        setMessageContent={setMessageContent}
+        handleSendMessage={handleSendMessage}
+      />
     </div>
   );
 }

@@ -6,6 +6,9 @@ import socket from "../../config/socketConfig";
 import MessageHeader from "./MessageHeader";
 import MessageInput from "./MessageInput";
 import MessageList from "./MessageList";
+import ErrorMessage from "../../components/common/ErrorMessage";
+import StartMessage from "../../components/common/StartMessage";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 function MessagePage() {
   const { chatId } = useParams();
@@ -18,6 +21,7 @@ function MessagePage() {
     data: fetchedMessages,
     isError,
     isLoading,
+    error,
   } = useQuery({
     queryKey: ["messages", chatId],
     queryFn: () => fetchMessages(chatId),
@@ -77,19 +81,13 @@ function MessagePage() {
       <MessageHeader chatUser={chatUser} />
 
       {isLoading ? (
-        <div className="flex items-center justify-center h-screen bg-gray-900 w-full">
-          <span className="loading loading-dots loading-lg"></span>
-        </div>
+        <LoadingSpinner />
+      ) : isError ? (
+        <ErrorMessage message={error.message} />
+      ) : fetchedMessages?.length === 0 ? (
+        <StartMessage />
       ) : (
         <MessageList messages={fetchedMessages} authUser={authUser} />
-      )}
-
-      {isError && (
-        <div className="flex items-center justify-center h-screen bg-gray-900 w-full">
-          <p className="text-red-500">
-            Something Went Wrong, Please try again later...
-          </p>
-        </div>
       )}
 
       <MessageInput

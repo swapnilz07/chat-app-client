@@ -21,7 +21,7 @@ function App() {
   if (isLoading) {
     return (
       <div className="h-screen flex justify-center items-center">
-        <LoadingSpinner size="lg" />
+        <LoadingSpinner />
       </div>
     );
   }

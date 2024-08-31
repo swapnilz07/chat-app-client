@@ -1,7 +1,9 @@
-/* eslint-disable react/prop-types */
-const LoadingSpinner = ({ size = "md" }) => {
-  const sizeClass = `loading-${size}`;
+function LoadingSpinner() {
+  return (
+    <div className="flex items-center justify-center h-screen bg-gray-900 w-full">
+      <span className="loading loading-dots loading-lg"></span>
+    </div>
+  );
+}
 
-  return <span className={`loading loading-spinner ${sizeClass}`} />;
-};
 export default LoadingSpinner;

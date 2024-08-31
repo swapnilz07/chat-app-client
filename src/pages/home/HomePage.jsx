@@ -2,9 +2,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { accessChat, fetchChats } from "../../api/chatAPI";
 import { fetchUsers } from "../../api/userAPI";
-import AsyncSelect from "react-select/async";
 import FetchChatSkeleton from "../../components/skeleton/FetchChatSkeleton";
 import { useNavigate } from "react-router-dom";
+import UserSearch from "../../components/common/UserSearch";
+import ChatList from "../../components/common/ChatList";
+import ErrorMessage from "../../components/common/ErrorMessage";
 
 const HomePage = () => {
   const [, setSelectedUser] = useState(null);
@@ -77,136 +79,39 @@ const HomePage = () => {
     }),
   };
 
-  if (isLoading) {
-    return (
-      <div className="p-4 w-96 h-screen flex flex-col text-white">
-        <h1 className="text-2xl font-bold mb-4">Chats</h1>
-        <div className="relative">
-          <AsyncSelect
-            cacheOptions
-            loadOptions={loadOptions}
-            onChange={handleUserClick}
-            defaultOptions
-            placeholder="Search for users..."
-            isClearable
-            styles={selectStyles}
-            getOptionLabel={(e) => (
-              <div className="flex items-center">
-                <img
-                  src={
-                    e.profileImg ||
-                    "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
-                  }
-                  alt={e.label}
-                  className="w-8 h-8 rounded-full inline-block mr-2"
-                />
-                <span>{e.label}</span>
-              </div>
-            )}
-          />
-        </div>
-        <div className="mt-4">
-          {[...Array(4)].map((_, index) => (
-            <FetchChatSkeleton key={index} />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (fetchingChatError) {
-    return (
-      <div className="p-4 w-96 h-screen flex items-center justify-center text-red-500">
-        {fetchError.message} || Something went wrong.
-      </div>
-    );
-  }
-
-  const filteredChats = fetchedChats?.filter((chat) => !chat.isGroupChat);
-
   return (
     <>
       <div className="p-4 w-96 h-screen flex flex-col text-white">
         <h1 className="text-2xl font-bold mb-4">Chats</h1>
-        <div className="relative">
-          <AsyncSelect
-            cacheOptions
-            loadOptions={loadOptions}
-            onChange={handleUserClick}
-            defaultOptions
-            placeholder="Search for users..."
-            isClearable
-            styles={selectStyles}
-            getOptionLabel={(e) => (
-              <div className="flex items-center">
-                <img
-                  src={
-                    e.profileImg ||
-                    "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
-                  }
-                  alt={e.label}
-                  className="w-8 h-8 rounded-full inline-block mr-2"
-                />
-                <span>{e.label}</span>
-              </div>
+        <UserSearch
+          loadOptions={loadOptions}
+          handleUserClick={handleUserClick}
+          selectStyles={selectStyles}
+        />
+        {isLoading ? (
+          <div className="mt-4">
+            {[...Array(4)].map((_, index) => (
+              <FetchChatSkeleton key={index} />
+            ))}
+          </div>
+        ) : (
+          <ChatList
+            chats={fetchedChats?.filter(
+              (chat) => !chat.isGroupChat && chat.latestMessage
             )}
+            authUser={authUser}
+            handleChatClick={handleChatClick}
+            searchMessage={"Search User to Start a Chat."}
           />
-        </div>
-        <div className="flex-1 overflow-y-auto mt-4 max-w-full">
-          {filteredChats?.length > 0 ? (
-            filteredChats?.map((chat, index) => {
-              const otherUser = chat.users.find(
-                (user) => user._id !== authUser._id
-              );
-              return (
-                <div
-                  key={index}
-                  className="flex items-center py-3 rounded-lg shadow-md cursor-pointer hover:bg-gray-700"
-                  onClick={() => handleChatClick(chat._id)} // Navigate to MessagePage on click
-                >
-                  <img
-                    src={
-                      otherUser?.profileImg ||
-                      "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
-                    }
-                    alt={otherUser?.name}
-                    className="w-12 h-12 rounded-full mr-4"
-                  />
-                  <div className="flex-1">
-                    <h3 className="font-bold">{otherUser?.name}</h3>
-                    <p className="text-gray-400 break-words whitespace-pre-wrap">
-                      {chat.latestMessage?.content || "No messages yet"}
-                    </p>
-                  </div>
-                  <span className="text-gray-400">
-                    {new Date(chat.updatedAt).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                </div>
-              );
-            })
-          ) : (
-            <div className="flex items-center justify-center flex-1">
-              <p className="text-gray-500">
-                Search for a user to start a chat.
-              </p>
-            </div>
-          )}
-        </div>
+        )}
+
         {isAccessingChat && (
           <div className="mt-4 text-center">
             <p className="text-blue-500">Starting chat...</p>
           </div>
         )}
-        {accessChatError && (
-          <div className="mt-4 text-center">
-            <p className="text-red-500">
-              Error starting chat: {accessError.message}
-            </p>
-          </div>
-        )}
+        {accessChatError && <ErrorMessage message={accessError.message} />}
+        {fetchingChatError && <ErrorMessage message={fetchError.message} />}
       </div>
     </>
   );

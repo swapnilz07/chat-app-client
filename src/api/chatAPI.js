@@ -49,7 +49,32 @@ export const createGroupChat = async (groupName, selectedUsers) => {
 
     return data;
   } catch (error) {
-    console.log(error.message);
+    console.log(`Error in creating group chat: ${error.message}`);
     throw new Error(error.message);
+  }
+};
+
+export const addMember = async ({ chatId, userId }) => {
+  try {
+    const res = await fetch("/api/chat/addToGroup", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      // The body should be stringified once and userId passed directly as an array or string
+      body: JSON.stringify({
+        chatId,
+        userId, // Already an array, no need for JSON.stringify here
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || "Something went wrong.");
+
+    return data;
+  } catch (error) {
+    console.error("Error in adding members to group:", error);
+    throw new Error(error.response?.data?.message || "Failed to add members");
   }
 };

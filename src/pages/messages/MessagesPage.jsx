@@ -82,8 +82,8 @@ function MessagePage() {
   );
 
   const headerData = isGroupChat
-    ? { groupChat: fetchedMessages?.[0]?.chat, isGroupChat }
-    : { chatUser, isGroupChat };
+    ? { groupChat: fetchedMessages?.[0]?.chat, isGroupChat, authUser }
+    : { chatUser, isGroupChat, authUser };
 
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-white w-full">

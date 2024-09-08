@@ -4,14 +4,12 @@ import { useState } from "react";
 import ProfilePage from "../profile/ProfilePage";
 
 const MessageHeader = ({ headerData }) => {
-  const { chatUser, groupChat, isGroupChat } = headerData;
+  const { chatUser, groupChat, isGroupChat, authUser } = headerData;
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
-
-  console.log("groupChat==>>", groupChat);
 
   return (
     <>
@@ -33,10 +31,10 @@ const MessageHeader = ({ headerData }) => {
             </div>
             {isModalOpen && (
               <div
-                className="absolute z-50 p-4 bg-gray-800 rounded-lg shadow-lg transition-transform duration-300 ease-in-out"
+                className="absolute z-50 p-2 bg-gray-800 rounded-lg shadow-lg transition-transform duration-300 ease-in-out"
                 style={{ position: "absolute" }}
               >
-                <ProfilePage user={groupChat} />
+                <ProfilePage user={groupChat} authUser={authUser} />
               </div>
             )}
           </>
@@ -60,7 +58,7 @@ const MessageHeader = ({ headerData }) => {
                 className="absolute z-50 p-4 shadow-lg transition-transform duration-300 ease-in-out"
                 style={{ position: "absolute" }}
               >
-                <ProfilePage user={chatUser} />
+                <ProfilePage user={chatUser} authUser={authUser} />
               </div>
             )}
           </>

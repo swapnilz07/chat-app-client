@@ -78,3 +78,29 @@ export const addMember = async ({ chatId, userId }) => {
     throw new Error(error.response?.data?.message || "Failed to add members");
   }
 };
+
+export const removeMember = async ({ chatId, userId }) => {
+  try {
+    const res = await fetch(`/api/chat/removefromgroup`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        chatId,
+        userId,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || "Something went wrong.");
+
+    return data;
+  } catch (error) {
+    console.error("Error in Removing members to group:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to Remove members"
+    );
+  }
+};

@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { logOut } from "../../api/authAPI";
-import { addMember } from "../../api/chatAPI";
+import { addMember, removeMember } from "../../api/chatAPI";
 import { fetchUsers } from "../../api/userAPI";
 import toast from "react-hot-toast";
 import AsyncSelect from "react-select/async";
@@ -10,6 +10,8 @@ import { AiOutlineUserAdd } from "react-icons/ai";
 
 function ProfilePage({ user, authUser }) {
   const [selectedUsers, setSelectedUsers] = useState([]);
+  const [userToRemove, setUserToRemove] = useState(null);
+  const [showModal, setShowModal] = useState(false); // Modal visibility state
   const queryClient = useQueryClient();
 
   const { mutate: addToGroup } = useMutation({
@@ -21,6 +23,20 @@ function ProfilePage({ user, authUser }) {
     },
     onError: () => {
       toast.error("Failed to add users to the group.");
+    },
+  });
+
+  // Mutation for removing users from the group
+  const { mutate: removeFromGroup } = useMutation({
+    mutationKey: ["removemember"],
+    mutationFn: ({ chatId, userId }) => removeMember({ chatId, userId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["messages"] });
+      toast.success("User removed from the group!");
+      setUserToRemove(null); // Clear the user after successful removal
+    },
+    onError: () => {
+      toast.error("Failed to remove user from the group.");
     },
   });
 
@@ -42,6 +58,11 @@ function ProfilePage({ user, authUser }) {
     } else {
       toast.error("Please select at least one user.");
     }
+  };
+
+  const handleRemoveUser = () => {
+    removeFromGroup({ chatId: user._id, userId: userToRemove._id });
+    setShowModal(false); // Hide modal after removal
   };
 
   const formatDate = (dateString) => {
@@ -152,6 +173,10 @@ function ProfilePage({ user, authUser }) {
               <li
                 key={groupUser._id}
                 className="flex items-center gap-3 py-1 max-h-12 overflow-y-auto"
+                onClick={() => {
+                  setUserToRemove(groupUser);
+                  setShowModal(true); // Show modal on click
+                }}
               >
                 <img
                   className="w-8 h-8 rounded-full object-cover"
@@ -174,6 +199,32 @@ function ProfilePage({ user, authUser }) {
           </ul>
         </div>
       )}
+
+      {/* Modal for confirming user removal */}
+      {authUser?._id === user?.groupAdmin?._id && showModal && (
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center">
+          <div className="p-3 rounded-lg shadow-lg bg-black/50">
+            <h3 className="text-lg font-semibold">
+              remove {userToRemove?.name}
+            </h3>
+            <div className="flex justify-end gap-4">
+              <button
+                className="btn btn-xs btn-outline btn-error"
+                onClick={handleRemoveUser}
+              >
+                Remove
+              </button>
+              <button
+                className="btn btn-xs btn-outline"
+                onClick={() => setShowModal(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {!user?.isGroupChat && (
         <>
           <div className="mt-4">
@@ -204,4 +255,5 @@ function ProfilePage({ user, authUser }) {
     </div>
   );
 }
+
 export default ProfilePage;

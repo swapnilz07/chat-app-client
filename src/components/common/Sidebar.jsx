@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { FaUser, FaUserGroup } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -7,8 +7,6 @@ import ProfilePage from "../../pages/profile/ProfilePage";
 function Sidebar() {
   const [isCollapsed] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const modalRef = useRef(null);
-  const profilePicRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -20,37 +18,8 @@ function Sidebar() {
     setIsModalOpen(!isModalOpen);
   };
 
-  const handleClickOutside = (event) => {
-    if (
-      modalRef.current &&
-      !modalRef.current.contains(event.target) &&
-      !profilePicRef.current.contains(event.target)
-    ) {
-      setIsModalOpen(false);
-    }
-  };
-
-  useEffect(() => {
-    if (isModalOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isModalOpen]);
-
-  useEffect(() => {
-    if (isModalOpen && modalRef.current && profilePicRef.current) {
-      const profilePicRect = profilePicRef.current.getBoundingClientRect();
-      modalRef.current.style.top = `${profilePicRect.top - 445}px`;
-      modalRef.current.style.left = `${profilePicRect.left }px`;
-    }
-  }, [isModalOpen]);
-
   if (isLoading) {
-    return <div>Loading...</div>; // Handle loading state
+    return <div>Loading...</div>;
   }
 
   return (
@@ -77,7 +46,7 @@ function Sidebar() {
           </div>
         </div>
 
-        <div ref={profilePicRef}>
+        <div>
           <img
             src={
               authUser?.profileImg ||
@@ -90,14 +59,17 @@ function Sidebar() {
         </div>
       </div>
 
-      {/* Custom Modal */}
+      {/* Modal positioned at bottom */}
       {isModalOpen && (
         <div
-          ref={modalRef}
-          className="absolute z-50 p-4 bg-gray-800 rounded-lg shadow-lg transition-transform duration-300 ease-in-out"
-          style={{ position: "absolute" }}
+          className="absolute bottom-12 left-20 z-50 p-4 bg-gray-800 rounded-lg shadow-lg transition-transform duration-300 ease-in-out"
+          // style={{
+          //   bottom: "7%", // Fix it to the bottom of the screen
+          //   left: "17%", // Center it horizontally
+          //   transform: "translateX(-50%)", // Align it properly
+          // }}
         >
-          <ProfilePage />
+          <ProfilePage user={authUser} authUser={authUser} />
         </div>
       )}
     </>

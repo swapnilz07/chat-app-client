@@ -42,10 +42,22 @@ export const getMe = async () => {
 
     if (!res.ok) throw new Error(data.error || "Something went wrong.");
 
-    // console.log("AuthUser ==>>", data);
     return data;
   } catch (error) {
     console.log(error.message);
     throw new Error(error.message);
+  }
+};
+
+export const logOut = async () => {
+  try {
+    const res = await fetch("/api/auth/logout", {
+      method: "POST",
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Something went wrong.");
+  } catch (error) {
+    throw new Error(error);
   }
 };

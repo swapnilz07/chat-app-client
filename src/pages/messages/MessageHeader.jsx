@@ -1,19 +1,73 @@
 /* eslint-disable react/prop-types */
-function MessageHeader({ chatUser }) {
+
+import { useState } from "react";
+import ProfilePage from "../profile/ProfilePage";
+
+const MessageHeader = ({ headerData }) => {
+  const { chatUser, groupChat, isGroupChat } = headerData;
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const toggleModal = () => {
+    setIsModalOpen(!isModalOpen);
+  };
+
+  console.log("groupChat==>>", groupChat);
+
   return (
-    <div className="sticky top-0 z-10 p-4 bg-gray-800 border-b border-gray-700">
-      <div className="flex items-center">
-        <img
-          src={chatUser?.profileImg || "/default-profile.png"}
-          alt={chatUser?.name}
-          className="w-10 h-10 rounded-full mr-3"
-        />
-        <div>
-          <h1 className="text-lg font-bold pl-2">{chatUser?.name}</h1>
-        </div>
+    <>
+      <div className="p-4 border-b border-gray-700 bg-gray-800">
+        {isGroupChat ? (
+          <>
+            <div className="flex items-center" onClick={toggleModal}>
+              <img
+                src={
+                  groupChat?.groupChatImage ||
+                  "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
+                }
+                alt={groupChat?.chatName}
+                className="w-10 h-10 rounded-full mr-3 cursor-pointer"
+              />
+              <div className="text-lg font-semibold text-white">
+                {groupChat?.chatName}
+              </div>
+            </div>
+            {isModalOpen && (
+              <div
+                className="absolute z-50 p-4 bg-gray-800 rounded-lg shadow-lg transition-transform duration-300 ease-in-out"
+                style={{ position: "absolute" }}
+              >
+                <ProfilePage user={groupChat} />
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <div className="relative flex items-center" onClick={toggleModal}>
+              <img
+                src={
+                  chatUser?.profileImg ||
+                  "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
+                }
+                alt={chatUser?.name}
+                className="w-10 h-10 rounded-full mr-3 cursor-pointer"
+              />
+              <div className="text-lg font-semibold text-white">
+                {chatUser?.name}
+              </div>
+            </div>
+            {isModalOpen && (
+              <div
+                className="absolute z-50 p-4 shadow-lg transition-transform duration-300 ease-in-out"
+                style={{ position: "absolute" }}
+              >
+                <ProfilePage user={chatUser} />
+              </div>
+            )}
+          </>
+        )}
       </div>
-    </div>
+    </>
   );
-}
+};
 
 export default MessageHeader;

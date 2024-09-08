@@ -10,8 +10,6 @@ const ChatList = ({ chats, authUser, handleChatClick, searchMessage }) => {
     );
   }
 
-  console.log("chats==>.", chats);
-
   return (
     <div className="flex-1 overflow-y-auto mt-4 max-w-full">
       {chats?.map((chat, index) => (

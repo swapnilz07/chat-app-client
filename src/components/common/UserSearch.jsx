@@ -1,14 +1,29 @@
 /* eslint-disable react/prop-types */
+import { useQuery } from "@tanstack/react-query";
 import AsyncSelect from "react-select/async";
+import { getAllUsers } from "../../api/userAPI";
 
 const UserSearch = ({ loadOptions, handleUserClick, selectStyles }) => {
+  const { data: users = [] } = useQuery({
+    queryKey: ["users"],
+    queryFn: getAllUsers,
+  });
+
+  console.log("users==>>", users);
+
+  const options = users.map((user) => ({
+    label: user.name,
+    userId: user._id,
+    profileImg: user.profileImg,
+  }));
+
   return (
     <div className="relative">
       <AsyncSelect
         cacheOptions
         loadOptions={loadOptions}
         onChange={handleUserClick}
-        defaultOptions
+        defaultOptions={options}
         placeholder="Search for users..."
         isClearable
         styles={selectStyles}

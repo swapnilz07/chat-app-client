@@ -13,6 +13,7 @@ import LoadingSpinner from "../../components/common/LoadingSpinner";
 function MessagePage() {
   const { chatId } = useParams();
   const [messageContent, setMessageContent] = useState("");
+
   const queryClient = useQueryClient();
 
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
@@ -26,6 +27,8 @@ function MessagePage() {
     queryKey: ["messages", chatId],
     queryFn: () => fetchMessages(chatId),
   });
+
+  console.log("fetchedMessages==>>", fetchedMessages);
 
   const sendMessageMutation = useMutation({
     mutationFn: (newMessage) => sendMessageAPI(newMessage),
@@ -72,13 +75,19 @@ function MessagePage() {
     sendMessageMutation.mutate(newMessage);
   };
 
+  const isGroupChat = fetchedMessages?.[0]?.chat?.isGroupChat;
+
   const chatUser = fetchedMessages?.[0]?.chat?.users?.find(
     (user) => user._id !== authUser?._id
   );
 
+  const headerData = isGroupChat
+    ? { groupChat: fetchedMessages?.[0]?.chat, isGroupChat }
+    : { chatUser, isGroupChat };
+
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-white w-full">
-      <MessageHeader chatUser={chatUser} />
+      <MessageHeader headerData={headerData} />
 
       {isLoading ? (
         <LoadingSpinner />

@@ -15,7 +15,7 @@ function GroupChat() {
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
   const queryClient = useQueryClient();
 
-  const { 
+  const {
     data: fetchedChats,
     isError: fetchingChatError,
     error: fetchError,

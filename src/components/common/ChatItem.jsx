@@ -10,6 +10,8 @@ const ChatItem = ({ chat, authUser, handleChatClick }) => {
       "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg";
   const chatName = chat.isGroupChat ? chat.chatName : otherUser?.name;
 
+  console.log("chat._id", chat._id);
+
   return (
     <div
       className="flex items-center py-3 rounded-lg shadow-md cursor-pointer hover:bg-gray-700"

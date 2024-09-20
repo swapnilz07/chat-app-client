@@ -3,11 +3,13 @@ import { validationSchemaForLogin } from "../../../config/formConfig.js";
 import TextError from "../../../components/common/TextError";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LoginUser } from "../../../api/authAPI.js";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 function LoginPage() {
   const queryClient = useQueryClient();
+
+  const navigate = useNavigate();
 
   const {
     mutate: loginMutaion,
@@ -18,8 +20,8 @@ function LoginPage() {
     mutationFn: LoginUser,
     onSuccess: () => {
       toast.success("User logged in successfully.");
-      queryClient.invalidateQueries({ queryKey: ["authuser"] });
-      window.location.href = "/";
+      queryClient.invalidateQueries({ queryKey: ["authUser"] });
+      navigate("/");
     },
   });
 

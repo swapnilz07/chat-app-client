@@ -9,8 +9,6 @@ const UserSearch = ({ loadOptions, handleUserClick, selectStyles }) => {
     queryFn: getAllUsers,
   });
 
-  console.log("users==>>", users);
-
   const options = users.map((user) => ({
     label: user.name,
     userId: user._id,

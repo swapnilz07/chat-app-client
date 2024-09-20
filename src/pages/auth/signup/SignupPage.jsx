@@ -41,7 +41,6 @@ function SignupPage() {
         >
           {({ touched, errors }) => (
             <Form className="space-y-6 w-full max-w-md">
-              {/* Name Field */}
               <div>
                 <label className="input input-bordered flex items-center gap-2">
                   <svg
@@ -63,8 +62,6 @@ function SignupPage() {
                   <ErrorMessage name="name" component={TextError} />
                 )}
               </div>
-
-              {/* Email Field */}
               <div>
                 <label className="input input-bordered flex items-center gap-2">
                   <svg
@@ -87,8 +84,6 @@ function SignupPage() {
                   <ErrorMessage name="email" component={TextError} />
                 )}
               </div>
-
-              {/* Password Field */}
               <div>
                 <label className="input input-bordered flex items-center gap-2">
                   <svg
@@ -114,7 +109,6 @@ function SignupPage() {
                   <ErrorMessage name="password" component={TextError} />
                 )}
               </div>
-
               <div className="pt-3">
                 <button
                   type="submit"

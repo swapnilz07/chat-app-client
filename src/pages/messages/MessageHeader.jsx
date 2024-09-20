@@ -55,7 +55,7 @@ const MessageHeader = ({ headerData }) => {
             </div>
             {isModalOpen && (
               <div
-                className="absolute z-50 p-4 shadow-lg transition-transform duration-300 ease-in-out"
+                className="absolute z-50 p-4 shadow-lg transition-transform duration-300 ease-in-out bg-gray-800"
                 style={{ position: "absolute" }}
               >
                 <ProfilePage user={chatUser} authUser={authUser} />

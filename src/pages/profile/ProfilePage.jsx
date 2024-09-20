@@ -5,13 +5,18 @@ import { logOut } from "../../api/authAPI";
 import { addMember, removeMember } from "../../api/chatAPI";
 import { fetchUsers } from "../../api/userAPI";
 import toast from "react-hot-toast";
-import AsyncSelect from "react-select/async";
-import { AiOutlineUserAdd } from "react-icons/ai";
+import { ProfileImage } from "./UserProfileImage";
+import { GroupInfo } from "./GroupInfo";
+import { GroupMembers } from "./GroupMembers";
+import { AddMembers } from "./AddMembers";
+import { UserInfo } from "./UserInfo";
+import { LogOutButton } from "./LogOutButton";
+import { RemoveMemberModal } from "./RemoveMemberModal";
 
 function ProfilePage({ user, authUser }) {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [userToRemove, setUserToRemove] = useState(null);
-  const [showModal, setShowModal] = useState(false); // Modal visibility state
+  const [showModal, setShowModal] = useState(false);
   const queryClient = useQueryClient();
 
   const { mutate: addToGroup } = useMutation({
@@ -26,14 +31,13 @@ function ProfilePage({ user, authUser }) {
     },
   });
 
-  // Mutation for removing users from the group
   const { mutate: removeFromGroup } = useMutation({
     mutationKey: ["removemember"],
     mutationFn: ({ chatId, userId }) => removeMember({ chatId, userId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["messages"] });
       toast.success("User removed from the group!");
-      setUserToRemove(null); // Clear the user after successful removal
+      setUserToRemove(null);
     },
     onError: () => {
       toast.error("Failed to remove user from the group.");
@@ -54,6 +58,7 @@ function ProfilePage({ user, authUser }) {
   const handleAddMembers = () => {
     if (selectedUsers.length > 0) {
       const userIds = selectedUsers.map((user) => user.value);
+      console.log("userIds==>.", userIds);
       addToGroup({ chatId: user._id, userId: userIds });
     } else {
       toast.error("Please select at least one user.");
@@ -62,7 +67,7 @@ function ProfilePage({ user, authUser }) {
 
   const handleRemoveUser = () => {
     removeFromGroup({ chatId: user._id, userId: userToRemove._id });
-    setShowModal(false); // Hide modal after removal
+    setShowModal(false);
   };
 
   const formatDate = (dateString) => {
@@ -98,160 +103,41 @@ function ProfilePage({ user, authUser }) {
 
   return (
     <div className="px-4 rounded-lg shadow-lg">
-      <div className="flex justify-center mb-4">
-        <img
-          className="w-20 h-20 rounded-full object-cover"
-          src={
-            user?.profileImg ||
-            "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
-          }
-          alt={user?.name || user?.chatName}
-        />
-      </div>
-      <h2 className="text-2xl font-bold text-center underline italic">
-        {user?.isGroupChat ? user?.chatName : user?.name}
-      </h2>
-      <p className="text-xs text-center text-white/50">
-        Created by {user?.groupAdmin?.name || "Unknown Admin"},{" "}
-        {formatDate(user.createdAt)}
-      </p>
-
+      <ProfileImage
+        profileImg={user?.profileImg}
+        altText={user?.name || "Profile Image"}
+      />
+      <GroupInfo user={user} formatDate={formatDate} />
       {user?.isGroupChat && (
-        <div className="py-2">
-          <h3 className="text-lg">Members</h3>
-          {authUser?._id === user?.groupAdmin?._id && (
-            <div className="py-2">
-              <AsyncSelect
-                isMulti
-                cacheOptions
-                loadOptions={loadOptions}
-                onChange={setSelectedUsers}
-                defaultOptions
-                placeholder="Search and select users..."
-                styles={{
-                  control: (provided) => ({
-                    ...provided,
-                    backgroundColor: "transparent",
-                    borderColor: "#374151",
-                    color: "white",
-                    "&:hover": {
-                      borderColor: "#4b5563",
-                    },
-                  }),
-                  input: (provided) => ({
-                    ...provided,
-                    color: "white",
-                  }),
-                  menu: (provided) => ({
-                    ...provided,
-                    backgroundColor: "#1f2937",
-                  }),
-                  singleValue: (provided) => ({
-                    ...provided,
-                    color: "white",
-                  }),
-                  option: (provided, state) => ({
-                    ...provided,
-                    backgroundColor: state.isFocused ? "#374151" : "#1f2937",
-                    color: state.isFocused ? "black" : "white",
-                  }),
-                }}
-              />
-              <div className="flex justify-center items-center">
-                <button
-                  className="btn btn-sm btn-outline btn-success text-white text-xs rounded-lg"
-                  onClick={handleAddMembers}
-                >
-                  <AiOutlineUserAdd size={15} /> Add
-                </button>
-              </div>
-            </div>
-          )}
-
-          <ul className="h-44 overflow-auto">
-            {user?.users?.map((groupUser) => (
-              <li
-                key={groupUser._id}
-                className="flex items-center gap-3 py-1 max-h-12 overflow-y-auto"
-                onClick={() => {
-                  setUserToRemove(groupUser);
-                  setShowModal(true); // Show modal on click
-                }}
-              >
-                <img
-                  className="w-8 h-8 rounded-full object-cover"
-                  src={
-                    groupUser?.profileImg ||
-                    "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
-                  }
-                  alt={groupUser?.name}
-                />
-                <h5 className="w-full flex justify-between items-center">
-                  {groupUser.name}
-                  {groupUser._id === user?.groupAdmin?._id && (
-                    <button className="bg-green-500 rounded-md text-[10px] px-1">
-                      Group Admin
-                    </button>
-                  )}
-                </h5>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Modal for confirming user removal */}
-      {authUser?._id === user?.groupAdmin?._id && showModal && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center">
-          <div className="p-3 rounded-lg shadow-lg bg-black/50">
-            <h3 className="text-lg font-semibold">
-              remove {userToRemove?.name}
-            </h3>
-            <div className="flex justify-end gap-4">
-              <button
-                className="btn btn-xs btn-outline btn-error"
-                onClick={handleRemoveUser}
-              >
-                Remove
-              </button>
-              <button
-                className="btn btn-xs btn-outline"
-                onClick={() => setShowModal(false)}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {!user?.isGroupChat && (
         <>
-          <div className="mt-4">
-            <h3 className="text-lg font-semibold">Email</h3>
-            <p className="text-gray-400 ">{user?.email}</p>
-          </div>
-          <div className="mt-4">
-            <h3 className="text-lg font-semibold">About</h3>
-            <p className="text-gray-400">
-              {user?.about || "No information available."}
-            </p>
-          </div>
+          <h3 className="text-xl font-semibold text-center underline">
+            Members
+          </h3>
+          <GroupMembers
+            user={user}
+            setUserToRemove={setUserToRemove}
+            setShowModal={setShowModal}
+          />
+
+          {authUser._id === user?.groupAdmin?._id && (
+            <AddMembers
+              setSelectedUsers={setSelectedUsers}
+              handleAddMembers={handleAddMembers}
+              loadOptions={loadOptions}
+            />
+          )}
         </>
       )}
-      {user?._id === authUser?._id && (
-        <div className="mt-6 text-center">
-          <button
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-            onClick={(e) => {
-              e.preventDefault();
-              logout();
-            }}
-          >
-            Log Out
-          </button>
-        </div>
+      {!user?.isGroupChat && <UserInfo user={user} />}
+      {authUser?._id === user?.groupAdmin?._id && showModal && (
+        <RemoveMemberModal
+          userToRemove={userToRemove}
+          handleRemoveUser={handleRemoveUser}
+          setShowModal={setShowModal}
+        />
       )}
+
+      {user?._id === authUser?._id && <LogOutButton logout={logout} />}
     </div>
   );
 }

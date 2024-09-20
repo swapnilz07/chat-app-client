@@ -28,8 +28,6 @@ function MessagePage() {
     queryFn: () => fetchMessages(chatId),
   });
 
-  console.log("fetchedMessages==>>", fetchedMessages);
-
   const sendMessageMutation = useMutation({
     mutationFn: (newMessage) => sendMessageAPI(newMessage),
     onSuccess: () => {
@@ -86,25 +84,27 @@ function MessagePage() {
     : { chatUser, isGroupChat, authUser };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-900 text-white w-full">
-      <MessageHeader headerData={headerData} />
+    <>
+      <div className="flex flex-col h-screen bg-gray-900 text-white w-full">
+        <MessageHeader headerData={headerData} />
 
-      {isLoading ? (
-        <LoadingSpinner />
-      ) : isError ? (
-        <ErrorMessage message={error.message} />
-      ) : fetchedMessages?.length === 0 ? (
-        <StartMessage />
-      ) : (
-        <MessageList messages={fetchedMessages} authUser={authUser} />
-      )}
+        {isLoading ? (
+          <LoadingSpinner />
+        ) : isError ? (
+          <ErrorMessage message={error.message} />
+        ) : fetchedMessages?.length === 0 ? (
+          <StartMessage />
+        ) : (
+          <MessageList messages={fetchedMessages} authUser={authUser} />
+        )}
 
-      <MessageInput
-        messageContent={messageContent}
-        setMessageContent={setMessageContent}
-        handleSendMessage={handleSendMessage}
-      />
-    </div>
+        <MessageInput
+          messageContent={messageContent}
+          setMessageContent={setMessageContent}
+          handleSendMessage={handleSendMessage}
+        />
+      </div>
+    </>
   );
 }
 
